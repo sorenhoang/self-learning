@@ -28,12 +28,25 @@
       "WebFetch(domain:en.wikipedia.org)",
       "WebFetch(domain:jmgarridopaz.github.io)",
       "WebFetch(domain:www.lennysnewsletter.com)",
-      "Bash(mkdir -p /Users/binhhoang/onlysoren/seft-learning/content/technical/docker-in-depth)",
+      "Bash(mkdir -p /Users/binhhoang/onlysoren/self-learning/content/technical/docker-in-depth)",
       "Bash(npx next *)",
-      "Bash(./node_modules/.bin/next build *)"
+      "Bash(./node_modules/.bin/next build *)",
+      "WebFetch(domain:blog.logrocket.com)",
+      "WebFetch(domain:www.geeksforgeeks.org)",
+      "WebFetch(domain:fugisawa.com)",
+      "WebFetch(domain:reflectoring.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:refactoring.guru)",
+      "Skill(write-series)",
+      "Skill(write-series:*)",
+      "Bash(mkdir -p /Users/binhhoang/onlysoren/self-learning/content/technical/design-patterns)",
+      "Bash(git add *)",
+      "Bash(git push *)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:www.percona.com)"
     ],
     "additionalDirectories": [
-      "/Users/binhhoang/onlysoren/seft-learning/content/technical"
+      "/Users/binhhoang/onlysoren/self-learning/content/technical"
     ]
   }
 }
