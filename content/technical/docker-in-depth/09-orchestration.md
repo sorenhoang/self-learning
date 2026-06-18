@@ -1,6 +1,6 @@
 ---
 title: "Orchestration — From Docker Swarm to Kubernetes"
-order: 6
+order: 9
 tags: ["docker", "kubernetes", "orchestration", "devops"]
 date: "2026-05-06"
 draft: false

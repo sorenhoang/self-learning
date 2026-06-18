@@ -1,6 +1,6 @@
 ---
 title: "Docker Security — Hardening Containers for Production"
-order: 4
+order: 7
 tags: ["docker", "security", "devops"]
 date: "2026-05-06"
 draft: false

@@ -1,6 +1,6 @@
 ---
 title: "Docker Compose — Multi-Container Apps Made Simple"
-order: 3
+order: 6
 tags: ["docker", "docker-compose", "devops"]
 date: "2026-05-06"
 draft: false

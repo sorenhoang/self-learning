@@ -1,6 +1,6 @@
 ---
 title: "Docker in CI/CD — Automating Builds and Deployments"
-order: 5
+order: 8
 tags: ["docker", "ci-cd", "devops", "github-actions"]
 date: "2026-05-06"
 draft: false
