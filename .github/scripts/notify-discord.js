@@ -55,21 +55,28 @@ async function waitForVercel() {
     return;
   }
 
-  console.log("Waiting for Vercel deployment to be ready...");
+  const commitSha = execSync("git rev-parse HEAD").toString().trim();
+  console.log(`Waiting for Vercel to deploy commit ${commitSha}...`);
   const MAX_ATTEMPTS = 30; // 30 × 10s = 5 min max
 
   for (let i = 0; i < MAX_ATTEMPTS; i++) {
     const res = await request(
-      `https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&limit=1&target=production`,
+      `https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&limit=5&target=production`,
       { headers: { Authorization: `Bearer ${VERCEL_TOKEN}` } }
     );
-    const deployment = JSON.parse(res.data)?.deployments?.[0];
-    const state = deployment?.readyState;
-    console.log(`Vercel: ${state} (attempt ${i + 1}/${MAX_ATTEMPTS})`);
+    const deployments = JSON.parse(res.data)?.deployments ?? [];
+    // match the deployment for THIS commit specifically
+    const deployment = deployments.find((d) => d.meta?.githubCommitSha === commitSha);
 
-    if (state === "READY") return;
-    if (state === "ERROR" || state === "CANCELED") {
-      throw new Error(`Vercel deployment ${state} — aborting notification.`);
+    if (!deployment) {
+      console.log(`Deployment not found yet... (${i + 1}/${MAX_ATTEMPTS})`);
+    } else {
+      const state = deployment.readyState;
+      console.log(`Vercel: ${state} (${i + 1}/${MAX_ATTEMPTS})`);
+      if (state === "READY") return;
+      if (state === "ERROR" || state === "CANCELED") {
+        throw new Error(`Vercel deployment ${state} — aborting notification.`);
+      }
     }
 
     await new Promise((r) => setTimeout(r, 10000));
