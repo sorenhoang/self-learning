@@ -56,7 +56,7 @@ async function main() {
           author: { name: "📝 New Post" },
           title: "Test: Service-to-Service Authentication",
           description: "This is a test notification from notify-discord.js.",
-          url: SITE_URL,
+          url: `${SITE_URL}/technical/service-to-service-authentication`,
           color: 0x2563eb,
           footer: { text: SITE_URL.replace("https://", "") },
         },
