@@ -1,6 +1,6 @@
 // Called by the discord-notify workflow.
-// Reads newly added .md files from the last commit, parses frontmatter,
-// and POSTs an embed to Discord for each non-draft post or series README.
+// Detects newly added posts/series from the last commit, waits for Vercel
+// to finish deploying, then POSTs an embed to Discord.
 //
 // Local test: DISCORD_WEBHOOK_URL=your_url node .github/scripts/notify-discord.js --test
 const { execSync } = require("child_process");
@@ -10,6 +10,8 @@ const { URL } = require("url");
 
 const SITE_URL = process.env.SITE_URL || "https://soren-learning.site";
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
 
 if (!WEBHOOK_URL) {
   console.log("DISCORD_WEBHOOK_URL not set — skipping.");
@@ -21,35 +23,69 @@ function frontmatter(content, key) {
   return m ? m[1].trim() : "";
 }
 
-function post(payload) {
-  const url = new URL(WEBHOOK_URL);
-  const body = JSON.stringify(payload);
+function request(urlStr, options = {}) {
+  const url = new URL(urlStr);
+  const body = options.body ? JSON.stringify(options.body) : undefined;
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
         hostname: url.hostname,
         path: url.pathname + url.search,
-        method: "POST",
+        method: options.method || "GET",
         headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(body),
+          ...(body ? { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) } : {}),
+          ...(options.headers || {}),
         },
       },
       (res) => {
-        console.log(`Discord: ${res.statusCode}`);
-        resolve();
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => resolve({ status: res.statusCode, data }));
       }
     );
     req.on("error", reject);
-    req.write(body);
+    if (body) req.write(body);
     req.end();
   });
 }
 
+async function waitForVercel() {
+  if (!VERCEL_TOKEN || !VERCEL_PROJECT_ID) {
+    console.log("VERCEL_TOKEN or VERCEL_PROJECT_ID not set — sending immediately.");
+    return;
+  }
+
+  console.log("Waiting for Vercel deployment to be ready...");
+  const MAX_ATTEMPTS = 30; // 30 × 10s = 5 min max
+
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const res = await request(
+      `https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&limit=1&target=production`,
+      { headers: { Authorization: `Bearer ${VERCEL_TOKEN}` } }
+    );
+    const deployment = JSON.parse(res.data)?.deployments?.[0];
+    const state = deployment?.readyState;
+    console.log(`Vercel: ${state} (attempt ${i + 1}/${MAX_ATTEMPTS})`);
+
+    if (state === "READY") return;
+    if (state === "ERROR" || state === "CANCELED") {
+      throw new Error(`Vercel deployment ${state} — aborting notification.`);
+    }
+
+    await new Promise((r) => setTimeout(r, 10000));
+  }
+
+  console.log("Timed out waiting for Vercel — sending anyway.");
+}
+
+async function sendDiscord(payload) {
+  const res = await request(WEBHOOK_URL, { method: "POST", body: payload });
+  console.log(`Discord: ${res.status}`);
+}
+
 async function main() {
-  // --test: send a dummy message to verify the webhook works
   if (process.argv.includes("--test")) {
-    await post({
+    await sendDiscord({
       content: "@everyone",
       embeds: [
         {
@@ -67,7 +103,6 @@ async function main() {
   }
 
   const diff = execSync("git diff --name-status HEAD~1 HEAD").toString();
-
   const newFiles = diff
     .split("\n")
     .filter((l) => l.startsWith("A\t"))
@@ -77,30 +112,25 @@ async function main() {
   const notifications = [];
 
   for (const file of newFiles) {
-    const parts = file.split("/"); // ["content", category, ...slug]
+    const parts = file.split("/");
     const content = fs.readFileSync(file, "utf8");
-
     if (frontmatter(content, "draft") === "true") continue;
 
     const title = frontmatter(content, "title");
     const description = frontmatter(content, "description");
 
-    // content/category/post.md — standalone post
+    // content/category/post.md
     if (parts.length === 3 && parts[2] !== "README.md") {
       notifications.push({
-        type: "post",
-        title,
-        description,
+        type: "post", title, description,
         url: `${SITE_URL}/${parts[1]}/${parts[2].replace(".md", "")}`,
       });
     }
 
-    // content/category/series/README.md — new series
+    // content/category/series/README.md
     if (parts.length === 4 && parts[3] === "README.md") {
       notifications.push({
-        type: "series",
-        title,
-        description,
+        type: "series", title, description,
         url: `${SITE_URL}/${parts[1]}/${parts[2]}`,
       });
     }
@@ -111,9 +141,11 @@ async function main() {
     return;
   }
 
+  await waitForVercel();
+
   for (const item of notifications) {
     const isSeries = item.type === "series";
-    await post({
+    await sendDiscord({
       content: "@everyone",
       embeds: [
         {
