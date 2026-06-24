@@ -80,13 +80,15 @@ export default async function CategoryPage({ params }: PageProps) {
       {/* Standalone Posts */}
       {cat.posts.length > 0 && (
         <section>
-          <h2 className="mb-5 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="mb-2 text-base font-semibold text-zinc-900 dark:text-zinc-100">
             Posts
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {cat.posts.map((post) => (
-              <PostCard key={post.slug} post={post} />
-            ))}
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {[...cat.posts]
+              .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""))
+              .map((post) => (
+                <PostCard key={post.slug} post={post} variant="list" />
+              ))}
           </div>
         </section>
       )}
