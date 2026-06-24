@@ -1,0 +1,21 @@
+name: Notify Discord on new content
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/**/*.md"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # need previous commit to diff
+
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SITE_URL: https://soren-learning.site
+        run: node .github/scripts/notify-discord.js
