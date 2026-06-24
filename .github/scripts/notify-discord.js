@@ -93,6 +93,7 @@ async function main() {
   for (const item of notifications) {
     const isSeries = item.type === "series";
     await post({
+      content: "@everyone",
       embeds: [
         {
           author: { name: isSeries ? "📚 New Series" : "📝 New Post" },
