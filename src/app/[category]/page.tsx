@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { buildContentTree, getCategoryReadme } from "@/lib/content";
 import { markdownToHtml } from "@/lib/markdown";
 import BookCard from "@/components/content/BookCard";
-import PostCard from "@/components/content/PostCard";
+import PostList from "@/components/content/PostList";
 import Link from "next/link";
 
 interface PageProps {
@@ -83,13 +83,11 @@ export default async function CategoryPage({ params }: PageProps) {
           <h2 className="mb-2 text-base font-semibold text-zinc-900 dark:text-zinc-100">
             Posts
           </h2>
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {[...cat.posts]
-              .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""))
-              .map((post) => (
-                <PostCard key={post.slug} post={post} variant="list" />
-              ))}
-          </div>
+          <PostList
+            posts={[...cat.posts].sort((a, b) =>
+              (b.date ?? "").localeCompare(a.date ?? "")
+            )}
+          />
         </section>
       )}
     </div>
