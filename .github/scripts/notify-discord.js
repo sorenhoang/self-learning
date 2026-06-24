@@ -1,7 +1,4 @@
-// Called by the discord-notify workflow.
-// Detects newly added posts/series from the last commit, waits for Vercel
-// to finish deploying, then POSTs an embed to Discord.
-//
+// Detects newly added posts/series from the last commit and notifies Discord.
 // Local test: DISCORD_WEBHOOK_URL=your_url node .github/scripts/notify-discord.js --test
 const { execSync } = require("child_process");
 const fs = require("fs");
@@ -10,8 +7,6 @@ const { URL } = require("url");
 
 const SITE_URL = process.env.SITE_URL || "https://soren-learning.site";
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
 
 if (!WEBHOOK_URL) {
   console.log("DISCORD_WEBHOOK_URL not set — skipping.");
@@ -23,87 +18,40 @@ function frontmatter(content, key) {
   return m ? m[1].trim() : "";
 }
 
-function request(urlStr, options = {}) {
-  const url = new URL(urlStr);
-  const body = options.body ? JSON.stringify(options.body) : undefined;
+function sendDiscord(payload) {
+  const url = new URL(WEBHOOK_URL);
+  const body = JSON.stringify(payload);
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
         hostname: url.hostname,
         path: url.pathname + url.search,
-        method: options.method || "GET",
+        method: "POST",
         headers: {
-          ...(body ? { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) } : {}),
-          ...(options.headers || {}),
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(body),
         },
       },
-      (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => resolve({ status: res.statusCode, data }));
-      }
+      (res) => { console.log(`Discord: ${res.status}`); resolve(); }
     );
     req.on("error", reject);
-    if (body) req.write(body);
+    req.write(body);
     req.end();
   });
-}
-
-async function waitForVercel() {
-  if (!VERCEL_TOKEN || !VERCEL_PROJECT_ID) {
-    console.log("VERCEL_TOKEN or VERCEL_PROJECT_ID not set — sending immediately.");
-    return;
-  }
-
-  const commitSha = execSync("git rev-parse HEAD").toString().trim();
-  console.log(`Waiting for Vercel to deploy commit ${commitSha}...`);
-  const MAX_ATTEMPTS = 30; // 30 × 10s = 5 min max
-
-  for (let i = 0; i < MAX_ATTEMPTS; i++) {
-    const res = await request(
-      `https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&limit=5&target=production`,
-      { headers: { Authorization: `Bearer ${VERCEL_TOKEN}` } }
-    );
-    const deployments = JSON.parse(res.data)?.deployments ?? [];
-    // match the deployment for THIS commit specifically
-    const deployment = deployments.find((d) => d.meta?.githubCommitSha === commitSha);
-
-    if (!deployment) {
-      console.log(`Deployment not found yet... (${i + 1}/${MAX_ATTEMPTS})`);
-    } else {
-      const state = deployment.readyState;
-      console.log(`Vercel: ${state} (${i + 1}/${MAX_ATTEMPTS})`);
-      if (state === "READY") return;
-      if (state === "ERROR" || state === "CANCELED") {
-        throw new Error(`Vercel deployment ${state} — aborting notification.`);
-      }
-    }
-
-    await new Promise((r) => setTimeout(r, 10000));
-  }
-
-  console.log("Timed out waiting for Vercel — sending anyway.");
-}
-
-async function sendDiscord(payload) {
-  const res = await request(WEBHOOK_URL, { method: "POST", body: payload });
-  console.log(`Discord: ${res.status}`);
 }
 
 async function main() {
   if (process.argv.includes("--test")) {
     await sendDiscord({
       content: "@everyone",
-      embeds: [
-        {
-          author: { name: "📝 New Post" },
-          title: "Test: Service-to-Service Authentication",
-          description: "This is a test notification from notify-discord.js.",
-          url: `${SITE_URL}/technical/service-to-service-authentication`,
-          color: 0x2563eb,
-          footer: { text: SITE_URL.replace("https://", "") },
-        },
-      ],
+      embeds: [{
+        author: { name: "📝 New Post" },
+        title: "Test: Service-to-Service Authentication",
+        description: "This is a test notification from notify-discord.js.",
+        url: `${SITE_URL}/technical/service-to-service-authentication`,
+        color: 0x2563eb,
+        footer: { text: SITE_URL.replace("https://", "") },
+      }],
     });
     console.log("Test message sent.");
     return;
@@ -148,27 +96,20 @@ async function main() {
     return;
   }
 
-  await waitForVercel();
-
   for (const item of notifications) {
     const isSeries = item.type === "series";
     await sendDiscord({
       content: "@everyone",
-      embeds: [
-        {
-          author: { name: isSeries ? "📚 New Series" : "📝 New Post" },
-          title: item.title,
-          description: item.description || "",
-          url: item.url,
-          color: isSeries ? 0x7c3aed : 0x2563eb,
-          footer: { text: SITE_URL.replace("https://", "") },
-        },
-      ],
+      embeds: [{
+        author: { name: isSeries ? "📚 New Series" : "📝 New Post" },
+        title: item.title,
+        description: item.description || "",
+        url: item.url,
+        color: isSeries ? 0x7c3aed : 0x2563eb,
+        footer: { text: SITE_URL.replace("https://", "") },
+      }],
     });
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+main().catch((e) => { console.error(e); process.exit(1); });

@@ -14,10 +14,8 @@ jobs:
         with:
           fetch-depth: 2 # need previous commit to diff
 
-      - name: Send Discord notification after deploy
+      - name: Send Discord notification
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           SITE_URL: https://soren-learning.site
         run: node .github/scripts/notify-discord.js
