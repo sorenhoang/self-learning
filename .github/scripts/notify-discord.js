@@ -1,6 +1,8 @@
 // Called by the discord-notify workflow.
 // Reads newly added .md files from the last commit, parses frontmatter,
 // and POSTs an embed to Discord for each non-draft post or series README.
+//
+// Local test: DISCORD_WEBHOOK_URL=your_url node .github/scripts/notify-discord.js --test
 const { execSync } = require("child_process");
 const fs = require("fs");
 const https = require("https");
@@ -45,6 +47,25 @@ function post(payload) {
 }
 
 async function main() {
+  // --test: send a dummy message to verify the webhook works
+  if (process.argv.includes("--test")) {
+    await post({
+      content: "@everyone",
+      embeds: [
+        {
+          author: { name: "📝 New Post" },
+          title: "Test: Service-to-Service Authentication",
+          description: "This is a test notification from notify-discord.js.",
+          url: SITE_URL,
+          color: 0x2563eb,
+          footer: { text: SITE_URL.replace("https://", "") },
+        },
+      ],
+    });
+    console.log("Test message sent.");
+    return;
+  }
+
   const diff = execSync("git diff --name-status HEAD~1 HEAD").toString();
 
   const newFiles = diff
