@@ -1,4 +1,5 @@
-// Detects newly added posts/series from the last commit and notifies Discord.
+// Detects newly added posts/series from the last commit, waits for Vercel
+// to finish deploying that commit, then notifies Discord.
 // Local test: DISCORD_WEBHOOK_URL=your_url node .github/scripts/notify-discord.js --test
 const { execSync } = require("child_process");
 const fs = require("fs");
@@ -7,6 +8,8 @@ const { URL } = require("url");
 
 const SITE_URL = process.env.SITE_URL || "https://soren-learning.site";
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
 
 if (!WEBHOOK_URL) {
   console.log("DISCORD_WEBHOOK_URL not set — skipping.");
@@ -18,6 +21,22 @@ function frontmatter(content, key) {
   return m ? m[1].trim() : "";
 }
 
+function httpGet(urlStr, headers = {}) {
+  const url = new URL(urlStr);
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      { hostname: url.hostname, path: url.pathname + url.search, headers },
+      (res) => {
+        let data = "";
+        res.on("data", (c) => (data += c));
+        res.on("end", () => resolve(JSON.parse(data)));
+      }
+    );
+    req.on("error", reject);
+    req.end();
+  });
+}
+
 function sendDiscord(payload) {
   const url = new URL(WEBHOOK_URL);
   const body = JSON.stringify(payload);
@@ -27,17 +46,49 @@ function sendDiscord(payload) {
         hostname: url.hostname,
         path: url.pathname + url.search,
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(body),
-        },
+        headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
       },
-      (res) => { console.log(`Discord: ${res.status}`); resolve(); }
+      (res) => { console.log(`Discord: ${res.statusCode}`); resolve(); }
     );
     req.on("error", reject);
     req.write(body);
     req.end();
   });
+}
+
+async function waitForVercel(commitSha) {
+  if (!VERCEL_TOKEN || !VERCEL_PROJECT_ID) {
+    console.log("Vercel credentials not set — sending immediately.");
+    return;
+  }
+
+  console.log(`Waiting for Vercel to deploy ${commitSha}...`);
+  const MAX_ATTEMPTS = 30; // 30 × 10s = 5 min max
+
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const data = await httpGet(
+      `https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&limit=5&target=production`,
+      { Authorization: `Bearer ${VERCEL_TOKEN}` }
+    );
+    const deployment = (data.deployments ?? []).find(
+      (d) => d.meta?.githubCommitSha === commitSha
+    );
+
+    if (!deployment) {
+      console.log(`Deployment not visible yet... (${i + 1}/${MAX_ATTEMPTS})`);
+    } else {
+      const state = deployment.readyState;
+      console.log(`Vercel: ${state} (${i + 1}/${MAX_ATTEMPTS})`);
+      if (state === "READY") return;
+      if (state === "ERROR" || state === "CANCELED") {
+        throw new Error(`Vercel deployment ${state} — aborting.`);
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, 10000));
+  }
+
+  console.log("Timed out — sending anyway.");
 }
 
 async function main() {
@@ -57,6 +108,7 @@ async function main() {
     return;
   }
 
+  // 1. Detect new content from git diff
   const diff = execSync("git diff --name-status HEAD~1 HEAD").toString();
   const newFiles = diff
     .split("\n")
@@ -74,7 +126,6 @@ async function main() {
     const title = frontmatter(content, "title");
     const description = frontmatter(content, "description");
 
-    // content/category/post.md
     if (parts.length === 3 && parts[2] !== "README.md") {
       notifications.push({
         type: "post", title, description,
@@ -82,7 +133,6 @@ async function main() {
       });
     }
 
-    // content/category/series/README.md
     if (parts.length === 4 && parts[3] === "README.md") {
       notifications.push({
         type: "series", title, description,
@@ -96,6 +146,11 @@ async function main() {
     return;
   }
 
+  // 2. Wait for Vercel to finish deploying this commit
+  const commitSha = execSync("git rev-parse HEAD").toString().trim();
+  await waitForVercel(commitSha);
+
+  // 3. Notify Discord
   for (const item of notifications) {
     const isSeries = item.type === "series";
     await sendDiscord({
