@@ -361,4 +361,4 @@ Never deploy `latest` to production. Deploy by SHA or semver tag so you always k
 
 ## What's Next
 
-Your pipeline now builds, tests, scans, and deploys Docker images automatically. But a single host running `docker compose` has limits — no automatic failover, no horizontal scaling, no zero-downtime deployments. Chapter 6 covers container orchestration: how Docker Swarm and Kubernetes manage containers at scale.
+Your pipeline now builds, tests, scans, and deploys Docker images automatically. But a single host running `docker compose` has limits — no automatic failover, no horizontal scaling, no zero-downtime deployments. Next: [Orchestration](./09-orchestration.md) — how Docker Swarm and Kubernetes manage containers at scale.
