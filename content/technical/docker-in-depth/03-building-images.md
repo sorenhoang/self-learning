@@ -227,4 +227,4 @@ Non-root — add USER before CMD in every production image.
 Pin tags — FROM node:20.11.0-alpine, not FROM node:latest.
 ```
 
-Next: [Networking](./04-networking.md) — how containers talk to each other.
+Next: [Networking](/technical/docker-in-depth/04-networking) — how containers talk to each other.

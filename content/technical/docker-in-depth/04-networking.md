@@ -174,4 +174,4 @@ docker run --network app-net --name api my-api:latest
 # api can now reach db:5432
 ```
 
-Next: [Volumes & Data](./05-volumes.md) — what happens to your data when a container stops.
+Next: [Volumes & Data](/technical/docker-in-depth/05-volumes) — what happens to your data when a container stops.

@@ -324,4 +324,4 @@ Before shipping a container to production, verify:
 
 ## What's Next
 
-You now have a hardened container. Next: [Docker in CI/CD](./08-cicd.md) — how to build, test, scan, and deploy that container automatically so every push is validated and every release is reproducible.
+You now have a hardened container. Next: [Docker in CI/CD](/technical/docker-in-depth/08-cicd) — how to build, test, scan, and deploy that container automatically so every push is validated and every release is reproducible.

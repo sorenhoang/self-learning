@@ -22,30 +22,30 @@ Each chapter is self-contained enough to reference directly, but the series is d
 
 | # | Chapter | What you'll understand |
 |:--|:--------|:-----------------------|
-| 1 | [What is Docker?](./01-what-is-docker.md) | Why containers exist, VM vs container, image vs container, namespaces/cgroups |
-| 2 | [Containers in Practice](./02-containers-in-practice.md) | docker run, container lifecycle, logs, exec, inspect |
-| 3 | [Building Images](./03-building-images.md) | Dockerfile, layer caching, multi-stage builds, push to registry |
+| 1 | [What is Docker?](/technical/docker-in-depth/01-what-is-docker) | Why containers exist, VM vs container, image vs container, namespaces/cgroups |
+| 2 | [Containers in Practice](/technical/docker-in-depth/02-containers-in-practice) | docker run, container lifecycle, logs, exec, inspect |
+| 3 | [Building Images](/technical/docker-in-depth/03-building-images) | Dockerfile, layer caching, multi-stage builds, push to registry |
 
 ### Part II — Networking & Data
 
 | # | Chapter | What you'll understand |
 |:--|:--------|:-----------------------|
-| 4 | [Networking](./04-networking.md) | Bridge networks, container DNS, port publishing, network segmentation |
-| 5 | [Volumes & Data](./05-volumes.md) | Named volumes, bind mounts, tmpfs, practical persistence patterns |
+| 4 | [Networking](/technical/docker-in-depth/04-networking) | Bridge networks, container DNS, port publishing, network segmentation |
+| 5 | [Volumes & Data](/technical/docker-in-depth/05-volumes) | Named volumes, bind mounts, tmpfs, practical persistence patterns |
 
 ### Part III — Building Real Applications
 
 | # | Chapter | What you'll understand |
 |:--|:--------|:-----------------------|
-| 6 | [Docker Compose](./06-docker-compose.md) | compose.yaml, healthchecks, env vars, multi-compose files |
-| 7 | [Docker Security](./07-security.md) | Non-root, capabilities, secrets, image scanning, network segmentation |
+| 6 | [Docker Compose](/technical/docker-in-depth/06-docker-compose) | compose.yaml, healthchecks, env vars, multi-compose files |
+| 7 | [Docker Security](/technical/docker-in-depth/07-security) | Non-root, capabilities, secrets, image scanning, network segmentation |
 
 ### Part IV — Production
 
 | # | Chapter | What you'll understand |
 |:--|:--------|:-----------------------|
-| 8 | [Docker in CI/CD](./08-cicd.md) | GitHub Actions pipeline, build cache, vulnerability scanning, registry push |
-| 9 | [Orchestration](./09-orchestration.md) | Docker Swarm, Kubernetes, Deployments, Services, HPA |
+| 8 | [Docker in CI/CD](/technical/docker-in-depth/08-cicd) | GitHub Actions pipeline, build cache, vulnerability scanning, registry push |
+| 9 | [Orchestration](/technical/docker-in-depth/09-orchestration) | Docker Swarm, Kubernetes, Deployments, Services, HPA |
 
 ---
 

@@ -166,4 +166,4 @@ Key rule:  image ≠ container.
            changing a container doesn't change the image.
 ```
 
-Next: [Containers in Practice](./02-containers-in-practice.md) — how to pull images, start/stop containers, and navigate the Docker CLI.
+Next: [Containers in Practice](/technical/docker-in-depth/02-containers-in-practice) — how to pull images, start/stop containers, and navigate the Docker CLI.

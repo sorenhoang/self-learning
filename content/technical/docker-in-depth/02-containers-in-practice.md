@@ -191,4 +191,4 @@ docker exec -it app sh                            ← debug inside
 docker stop app && docker rm app                  ← clean up
 ```
 
-Next: [Building Images](./03-building-images.md) — how to write a Dockerfile and build your own images.
+Next: [Building Images](/technical/docker-in-depth/03-building-images) — how to write a Dockerfile and build your own images.

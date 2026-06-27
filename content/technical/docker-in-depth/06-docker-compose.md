@@ -334,4 +334,4 @@ services:
 
 ## What's Next
 
-Compose gives you a convenient, reproducible local environment. But convenience can mask security problems. Next: [Docker Security](./07-security.md) — what the actual risks are, how containers can escape isolation, and the hardening steps that matter in production.
+Compose gives you a convenient, reproducible local environment. But convenience can mask security problems. Next: [Docker Security](/technical/docker-in-depth/07-security) — what the actual risks are, how containers can escape isolation, and the hardening steps that matter in production.

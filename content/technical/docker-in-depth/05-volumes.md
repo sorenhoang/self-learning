@@ -193,4 +193,4 @@ Volumes survive: container stop, restart, rm
 Volumes die on:  docker volume rm, docker volume prune
 ```
 
-Next: [Docker Compose](./06-docker-compose.md) — replace all these docker run commands with a single YAML file.
+Next: [Docker Compose](/technical/docker-in-depth/06-docker-compose) — replace all these docker run commands with a single YAML file.
