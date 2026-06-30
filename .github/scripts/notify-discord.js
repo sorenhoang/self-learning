@@ -29,7 +29,7 @@ function sendDiscord(payload) {
         method: "POST",
         headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
       },
-      (res) => { console.log(`Discord: ${res.statusCode}`); resolve(); }
+      (res) => { res.resume(); console.log(`Discord: ${res.statusCode}`); resolve(); }
     );
     req.on("error", reject);
     req.write(body);
