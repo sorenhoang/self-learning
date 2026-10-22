@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/technical", label: "Technical" },
   { href: "/product-mindset", label: "Product" },
   { href: "/design-ux", label: "Design & UX" },
+  { href: "/system-design", label: "System Design" },
   { href: "/growth-softskill", label: "Growth" },
 ];
 
