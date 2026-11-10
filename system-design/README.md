@@ -2,7 +2,7 @@
 title: "System Design"
 description: "System design interview walkthroughs — each post designs one real system end to end using a single repeatable delivery framework."
 # Tracker groups. Each item's slug comes from its title ("Design a URL Shortener" → design-a-url-shortener.md).
-# An item is "learned" once content/system-design/<slug>.md exists; otherwise it shows "Soon".
+# An item is "learned" once system-design/<slug>.md exists; otherwise it shows "Soon".
 groups:
   - name: "Foundation"
     description: "The basics every design builds on: scaling step by step, quick capacity math, and a repeatable interview framework."
@@ -40,5 +40,3 @@ groups:
       - "Design a Digital Wallet"
       - "Design a Stock Exchange"
 ---
-
-Every problem follows the same structure. See [Design Problem Template](/system-design/design-problem-template).

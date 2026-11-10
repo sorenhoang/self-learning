@@ -4,7 +4,6 @@ import { buildContentTree, getCategoryReadme } from "@/lib/content";
 import { markdownToHtml } from "@/lib/markdown";
 import BookCard from "@/components/content/BookCard";
 import PostList from "@/components/content/PostList";
-import ProblemTracker, { type TrackerGroup } from "@/components/content/ProblemTracker";
 import Link from "next/link";
 
 interface PageProps {
@@ -36,9 +35,8 @@ export default async function CategoryPage({ params }: PageProps) {
   const cat = tree.categories.find((c) => c.slug === category);
   if (!cat) notFound();
 
-  const { content, data } = getCategoryReadme(category);
+  const { content } = getCategoryReadme(category);
   const introHtml = await markdownToHtml(content);
-  const trackerGroups = data.groups as TrackerGroup[] | undefined;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -65,11 +63,8 @@ export default async function CategoryPage({ params }: PageProps) {
         )}
       </div>
 
-      {/* README `groups:` turns the category into a tracker instead of series/post lists */}
-      {trackerGroups && <ProblemTracker category={cat} groups={trackerGroups} />}
-
       {/* Books / Series */}
-      {!trackerGroups && cat.books.length > 0 && (
+      {cat.books.length > 0 && (
         <section className="mb-12">
           <h2 className="mb-5 text-base font-semibold text-zinc-900 dark:text-zinc-100">
             Series
@@ -83,7 +78,7 @@ export default async function CategoryPage({ params }: PageProps) {
       )}
 
       {/* Standalone Posts */}
-      {!trackerGroups && cat.posts.length > 0 && (
+      {cat.posts.length > 0 && (
         <section>
           <h2 className="mb-2 text-base font-semibold text-zinc-900 dark:text-zinc-100">
             Posts

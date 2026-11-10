@@ -56,9 +56,14 @@ content/
 /{category}/{slug}             → same page, branches on resolveSlugType()
 /{category}/{slug}/{chapter}   → src/app/[category]/[slug]/[chapter]/page.tsx
 /tags/{tag}                    → src/app/tags/[tag]/page.tsx
+/system-design                 → src/app/system-design/ (standalone tracker, NOT a category)
 /api/search-index              → static JSON built from buildSearchIndex()
 /api/og                        → edge function, generates OG images on demand
 ```
+
+### System Design tracker
+
+`system-design/` (repo root, outside `content/`) is a standalone tracker with its own sidebar layout, not a category. Groups and problem titles live in `system-design/README.md` frontmatter (`groups:`). A problem is "learned" once `system-design/<slug>.md` exists (slug = kebab-case title); otherwise it shows "Soon". Read by `src/lib/system-design.ts`.
 
 ### Core data layer (`src/lib/content.ts`)
 
