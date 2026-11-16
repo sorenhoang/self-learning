@@ -63,7 +63,7 @@ content/
 
 ### System Design tracker
 
-`system-design/` (repo root, outside `content/`) is a standalone tracker with its own sidebar layout, not a category. Groups and problem titles live in `system-design/README.md` frontmatter (`groups:`). A problem is "learned" once `system-design/<slug>.md` exists (slug = kebab-case title); otherwise it shows "Soon". Read by `src/lib/system-design.ts`.
+`system-design/` (repo root, outside `content/`) is a standalone tracker with its own sidebar layout, not a category. Groups and problem titles live in `system-design/README.md` frontmatter (`groups:`). A problem is "learned" once `system-design/<slug>.md` exists (slug = kebab-case title); otherwise it shows "Soon". Read by `src/lib/system-design.ts`. Excalidraw source diagrams live in `system-design/excalidraw/<slug>/vX.Y.excalidraw` (one folder per problem, one file per version); they are not rendered by the site.
 
 ### Core data layer (`src/lib/content.ts`)
 
